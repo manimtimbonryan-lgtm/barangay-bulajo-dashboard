@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="fil">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Barangay Bulajo — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root {
+    --navy:   #0f1f3d;
+    --navy2:  #162847;
+    --gold:   #c9a84c;
+    --gold2:  #e8c96a;
+    --cream:  #f5f0e8;
+    --white:  #ffffff;
+    --grey:   #8a95a3;
+    --light:  #e8edf3;
+    --red:    #c0392b;
+    --green:  #1a7a4a;
+    --card:   #ffffff;
+    --shadow: 0 4px 24px rgba(15,31,61,0.10);
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--cream);
+    color: var(--navy);
+    min-height: 100vh;
+  }
+
+  /* ── LOGIN SCREEN ── */
+  #login-screen {
+    position: fixed; inset: 0;
+    background: var(--navy);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000;
+    background-image:
+      radial-gradient(ellipse at 20% 80%, rgba(201,168,76,0.15) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(201,168,76,0.10) 0%, transparent 60%);
+  }
+
+  .login-box {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 20px;
+    padding: 48px 44px;
+    width: 100%;
+    max-width: 420px;
+    backdrop-filter: blur(12px);
+    text-align: center;
+  }
+
+  .login-seal {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 36px;
+    box-shadow: 0 8px 32px rgba(201,168,76,0.4);
+  }
+
+  .login-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    color: var(--white);
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+
+  .login-sub {
+    font-size: 13px;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 36px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .login-field {
+    margin-bottom: 14px;
+    text-align: left;
+  }
+
+  .login-field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 6px;
+  }
+
+  .login-field input {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    color: var(--white);
+    font-family: 'Outfit', sans-serif;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .login-field input:focus {
+    border-color: var(--gold);
+    background: rgba(255,255,255,0.10);
+  }
+
+  .login-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    border: none;
+    border-radius: 10px;
+    color: var(--navy);
+    font-family: 'Outfit', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+    letter-spacing: 0.04em;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+
+  .login-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  .login-btn:active { transform: translateY(0); }
+
+  .login-error {
+    color: #ff7c7c;
+    font-size: 13px;
+    margin-top: 12px;
+    display: none;
+  }
+
+  /* ── SUPABASE CONFIG MODAL ── */
+  #config-modal {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 2000;
+  }
+
+  #config-modal.show { display: flex; }
+
+  .config-box {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 36px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+
+  .config-box h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--navy);
+    margin-bottom: 6px;
+  }
+
+  .config-box p {
+    font-size: 13px;
+    color: var(--grey);
+    margin-bottom: 24px;
+  }
+
+  .config-field { margin-bottom: 16px; }
+  .config-field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--navy);
+    margin-bottom: 6px;
+  }
+
+  .config-field input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid var(--light);
+    border-radius: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    outline: none;
+    color: var(--navy);
+    transition: border-color 0.2s;
+  }
+
+  .config-field input:focus { border-color: var(--navy); }
+
+  .config-actions { display: flex; gap: 10px; margin-top: 8px; }
+
+  .btn-primary {
+    padding: 11px 24px;
+    background: var(--navy);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .btn-primary:hover { opacity: 0.85; }
+
+  .btn-secondary {
+    padding: 11px 24px;
+    background: var(--light);
+    color: var(--navy);
+    border: none;
+    border-radius: 8px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  /* ── MAIN APP ── */
+  #app { display: none; }
+  #app.show { display: block; }
+
+  /* TOPBAR */
+  .topbar {
+    background: var(--navy);
+    color: var(--white);
+    padding: 0 32px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 20px rgba(15,31,61,0.25);
+  }
+
+  .topbar-left {
+    display: flex; align-items: center; gap: 14px;
+  }
+
+  .topbar-seal {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .topbar-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: var(--white);
+    line-height: 1.1;
+  }
+
+  .topbar-title span {
+    display: block;
+    font-family: 'Outfit', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .topbar-right { display: flex; align-items: center; gap: 16px; }
+
+  .sync-status {
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .topbar-btn {
+    padding: 7px 16px;
+    border-radius: 7px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+
+  .btn-config {
+    background: rgba(255,255,255,0.1);
+    color: var(--white);
+  }
+
+  .btn-config:hover { background: rgba(255,255,255,0.18); }
+
+  .btn-logout {
+    background: rgba(192,57,43,0.25);
+    color: #ff9999;
+  }
+
+  .btn-logout:hover { background: rgba(192,57,43,0.4); }
+
+  /* TABS */
+  .tabs {
+    background: var(--white);
+    border-bottom: 2px solid var(--light);
+    padding: 0 32px;
+    display: flex; gap: 4px;
+    position: sticky; top: 64px; z-index: 99;
+    box-shadow: 0 2px 8px rgba(15,31,61,0.05);
+  }
+
+  .tab {
+    padding: 16px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--grey);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    background: none; border-top: none; border-left: none; border-right: none;
+    font-family: 'Outfit', sans-serif;
+  }
+
+  .tab:hover { color: var(--navy); }
+
+  .tab.active {
+    color: var(--navy);
+    border-bottom-color: var(--gold);
+  }
+
+  /* CONTENT */
+  .content {
+    padding: 32px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* DASHBOARD CARDS */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(15,31,61,0.06);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(15,31,61,0.14);
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--gold2));
+  }
+
+  .stat-icon {
+    font-size: 28px;
+    margin-bottom: 12px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--grey);
+    margin-bottom: 6px;
+  }
+
+  .stat-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 42px;
+    color: var(--navy);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-sub {
+    font-size: 12px;
+    color: var(--grey);
+  }
+
+  /* SECTION HEADER */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 24px;
+    color: var(--navy);
+  }
+
+  .section-sub {
+    font-size: 13px;
+    color: var(--grey);
+    margin-top: 2px;
+  }
+
+  /* TABLE CONTAINER */
+  .table-wrap {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(15,31,61,0.06);
+    overflow: hidden;
+  }
+
+  .table-toolbar {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--light);
+    flex-wrap: wrap;
+  }
+
+  .search-input {
+    flex: 1;
+    min-width: 200px;
+    padding: 9px 14px;
+    border: 1.5px solid var(--light);
+    border-radius: 8px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    outline: none;
+    color: var(--navy);
+    transition: border-color 0.2s;
+  }
+
+  .search-input:focus { border-color: var(--navy); }
+
+  .filter-select {
+    padding: 9px 14px;
+    border: 1.5px solid var(--light);
+    border-radius: 8px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    outline: none;
+    color: var(--navy);
+    background: var(--white);
+    cursor: pointer;
+  }
+
+  .export-btn {
+    padding: 9px 18px;
+    background: var(--green);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  .export-btn:hover { opacity: 0.85; }
+
+  .refresh-btn {
+    padding: 9px 14px;
+    background: var(--light);
+    color: var(--navy);
+    border: none;
+    border-radius: 8px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .refresh-btn:hover { opacity: 0.75; }
+
+  .record-count {
+    font-size: 12px;
+    color: var(--grey);
+    font-family: 'DM Mono', monospace;
+    white-space: nowrap;
+  }
+
+  /* DATA TABLE */
+  .data-table-scroll { overflow-x: auto; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+
+  thead tr {
+    background: var(--navy);
+    color: var(--white);
+  }
+
+  th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+  }
+
+  th:hover { background: var(--navy2); }
+
+  td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--light);
+    color: var(--navy);
+    vertical-align: middle;
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+
+  tbody tr:hover { background: rgba(201,168,76,0.05); }
+
+  tbody tr:nth-child(even) { background: rgba(15,31,61,0.02); }
+  tbody tr:nth-child(even):hover { background: rgba(201,168,76,0.05); }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  .badge-free { background: #e8f5e9; color: #2e7d32; }
+  .badge-paid { background: #e3f2fd; color: #1565c0; }
+  .badge-male { background: #e3f2fd; color: #1565c0; }
+  .badge-female { background: #fce4ec; color: #c2185b; }
+  .badge-ftjs { background: #fff3e0; color: #e65100; }
+
+  .amount-cell {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  /* LOADING */
+  .loading-row td {
+    text-align: center;
+    padding: 60px;
+    color: var(--grey);
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 20px; height: 20px;
+    border: 2px solid var(--light);
+    border-top-color: var(--navy);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* PAGINATION */
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-top: 1px solid var(--light);
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .page-info {
+    font-size: 12px;
+    color: var(--grey);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .page-btns { display: flex; gap: 6px; }
+
+  .page-btn {
+    padding: 6px 12px;
+    border: 1.5px solid var(--light);
+    border-radius: 6px;
+    background: var(--white);
+    color: var(--navy);
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+
+  .page-btn:hover { border-color: var(--navy); }
+  .page-btn.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
+  .page-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* DASHBOARD GRID */
+  .dash-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  @media (max-width: 900px) { .dash-grid { grid-template-columns: 1fr; } }
+
+  .chart-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(15,31,61,0.06);
+  }
+
+  .chart-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: var(--navy);
+    margin-bottom: 20px;
+  }
+
+  .bar-item {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .bar-label { font-size: 13px; color: var(--navy); min-width: 100px; }
+
+  .bar-track {
+    flex: 1; height: 10px;
+    background: var(--light);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 5px;
+    background: linear-gradient(90deg, var(--navy), var(--navy2));
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .bar-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--grey);
+    min-width: 40px;
+    text-align: right;
+  }
+
+  /* TOAST */
+  #toast {
+    position: fixed;
+    bottom: 28px; right: 28px;
+    background: var(--navy);
+    color: var(--white);
+    padding: 14px 22px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 9999;
+    max-width: 340px;
+  }
+
+  #toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  #toast.error { background: var(--red); }
+  #toast.success { background: var(--green); }
+
+  /* DATE FILTER */
+  .date-filters {
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+  }
+
+  .date-input {
+    padding: 9px 12px;
+    border: 1.5px solid var(--light);
+    border-radius: 8px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    outline: none;
+    color: var(--navy);
+  }
+
+  .date-input:focus { border-color: var(--navy); }
+
+  /* NO DATA */
+  .no-data {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--grey);
+  }
+
+  .no-data-icon { font-size: 48px; margin-bottom: 12px; }
+  .no-data-text { font-size: 15px; }
+  .no-data-sub { font-size: 13px; margin-top: 6px; }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .content { padding: 16px; }
+    .topbar { padding: 0 16px; }
+    .tabs { padding: 0 16px; overflow-x: auto; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-seal">🏛️</div>
+    <div class="login-title">Barangay Bulajo</div>
+    <div class="login-sub">Dashboard & Reports System</div>
+
+    <div class="login-field">
+      <label>Password</label>
+      <input type="password" id="login-pass" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="login-btn" onclick="doLogin()">SIGN IN</button>
+    <div class="login-error" id="login-err">❌ Mali ang password. Subukan ulit.</div>
+  </div>
+</div>
+
+<!-- SUPABASE CONFIG MODAL -->
+<div id="config-modal">
+  <div class="config-box">
+    <h2>⚙️ Supabase Configuration</h2>
+    <p>I-enter ang iyong Supabase credentials para ma-connect ang dashboard sa database.</p>
+
+    <div class="config-field">
+      <label>Supabase Project URL</label>
+      <input type="text" id="cfg-url" placeholder="https://xxxxxx.supabase.co">
+    </div>
+    <div class="config-field">
+      <label>Anon Public Key</label>
+      <input type="text" id="cfg-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+    </div>
+
+    <div class="config-actions">
+      <button class="btn-primary" onclick="saveConfig()">💾 I-save at I-connect</button>
+      <button class="btn-secondary" onclick="closeConfig()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-seal">🏛️</div>
+      <div class="topbar-title">
+        Barangay Bulajo
+        <span>Cavinti, Laguna — Dashboard</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <span class="sync-status" id="sync-status">⬜ Not connected</span>
+      <button class="topbar-btn btn-config" onclick="openConfig()">⚙️ Configure</button>
+      <button class="topbar-btn btn-logout" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('dashboard')">📊 Dashboard</button>
+    <button class="tab" onclick="switchTab('residents')">👥 Residents</button>
+    <button class="tab" onclick="switchTab('transactions')">📋 Transactions</button>
+    <button class="tab" onclick="switchTab('ftjs')">🧾 FTJS</button>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- DASHBOARD PAGE -->
+    <div class="page active" id="page-dashboard">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Overview</div>
+          <div class="section-sub" id="dash-date">Loading...</div>
+        </div>
+        <button class="refresh-btn" onclick="loadDashboard()">🔄 Refresh</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">👥</div>
+          <div class="stat-label">Total Residents</div>
+          <div class="stat-value" id="stat-residents">—</div>
+          <div class="stat-sub" id="stat-residents-sub">Loading...</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📋</div>
+          <div class="stat-label">Total Transactions</div>
+          <div class="stat-value" id="stat-tx">—</div>
+          <div class="stat-sub" id="stat-tx-sub">Loading...</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">💰</div>
+          <div class="stat-label">Total Collected</div>
+          <div class="stat-value" id="stat-amount">—</div>
+          <div class="stat-sub">Kabuuang bayad</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🧾</div>
+          <div class="stat-label">FTJS Issued</div>
+          <div class="stat-value" id="stat-ftjs">—</div>
+          <div class="stat-sub">First-Time Job Seekers</div>
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <div class="chart-card">
+          <div class="chart-title">Certificates Issued</div>
+          <div id="cert-chart">
+            <div class="no-data"><div class="no-data-icon">📊</div><div class="no-data-text">Loading data...</div></div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Residents by Gender</div>
+          <div id="gender-chart">
+            <div class="no-data"><div class="no-data-icon">📊</div><div class="no-data-text">Loading data...</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESIDENTS PAGE -->
+    <div class="page" id="page-residents">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Masterlist ng Residents</div>
+          <div class="section-sub">Lahat ng registered residents ng Barangay Bulajo</div>
+        </div>
+        <button class="export-btn" onclick="exportResidents()">📥 Export Excel</button>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <input class="search-input" id="res-search" placeholder="🔍 Hanapin ang resident..." oninput="filterResidents()">
+          <select class="filter-select" id="res-gender" onchange="filterResidents()">
+            <option value="">All Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
+          <button class="refresh-btn" onclick="loadResidents()">🔄</button>
+          <span class="record-count" id="res-count"></span>
+        </div>
+        <div class="data-table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th onclick="sortTable('residents','id')">ID</th>
+                <th onclick="sortTable('residents','household_number')">HH No.</th>
+                <th onclick="sortTable('residents','full_name')">Full Name</th>
+                <th onclick="sortTable('residents','age')">Age</th>
+                <th onclick="sortTable('residents','gender')">Gender</th>
+                <th onclick="sortTable('residents','civil_status')">Civil Status</th>
+                <th onclick="sortTable('residents','address')">Address</th>
+                <th onclick="sortTable('residents','created_at')">Registered</th>
+              </tr>
+            </thead>
+            <tbody id="res-tbody">
+              <tr class="loading-row"><td colspan="8"><span class="spinner"></span>Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination" id="res-pagination"></div>
+      </div>
+    </div>
+
+    <!-- TRANSACTIONS PAGE -->
+    <div class="page" id="page-transactions">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Transaction Log</div>
+          <div class="section-sub">Lahat ng nai-issue na certificates</div>
+        </div>
+        <button class="export-btn" onclick="exportTransactions()">📥 Export Excel</button>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <div class="date-filters">
+            <input class="date-input" type="date" id="tx-from" onchange="filterTransactions()">
+            <span style="color:var(--grey);font-size:13px">hanggang</span>
+            <input class="date-input" type="date" id="tx-to" onchange="filterTransactions()">
+          </div>
+          <input class="search-input" id="tx-search" placeholder="🔍 Pangalan o cert type..." oninput="filterTransactions()" style="min-width:160px">
+          <select class="filter-select" id="tx-type" onchange="filterTransactions()">
+            <option value="">All Types</option>
+          </select>
+          <button class="refresh-btn" onclick="loadTransactions()">🔄</button>
+          <span class="record-count" id="tx-count"></span>
+        </div>
+        <div class="data-table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th onclick="sortTable('transactions','id')">ID</th>
+                <th onclick="sortTable('transactions','resident_name')">Resident</th>
+                <th onclick="sortTable('transactions','cert_type')">Certificate</th>
+                <th onclick="sortTable('transactions','or_number')">OR No.</th>
+                <th onclick="sortTable('transactions','amount')">Amount</th>
+                <th onclick="sortTable('transactions','issued_by')">Issued By</th>
+                <th onclick="sortTable('transactions','date_issued')">Date Issued</th>
+                <th onclick="sortTable('transactions','purpose')">Purpose</th>
+              </tr>
+            </thead>
+            <tbody id="tx-tbody">
+              <tr class="loading-row"><td colspan="8"><span class="spinner"></span>Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination" id="tx-pagination"></div>
+      </div>
+    </div>
+
+    <!-- FTJS PAGE -->
+    <div class="page" id="page-ftjs">
+      <div class="section-header">
+        <div>
+          <div class="section-title">FTJS Masterlist</div>
+          <div class="section-sub">First-Time Job Seeker Certificate Recipients</div>
+        </div>
+        <button class="export-btn" onclick="exportFtjs()">📥 Export Excel</button>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <input class="search-input" id="ftjs-search" placeholder="🔍 Hanapin..." oninput="filterFtjs()">
+          <select class="filter-select" id="ftjs-gender" onchange="filterFtjs()">
+            <option value="">All Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
+          <button class="refresh-btn" onclick="loadFtjs()">🔄</button>
+          <span class="record-count" id="ftjs-count"></span>
+        </div>
+        <div class="data-table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>No.</th>
+                <th onclick="sortTable('ftjs','household_number')">HH No.</th>
+                <th onclick="sortTable('ftjs','full_name')">Full Name</th>
+                <th onclick="sortTable('ftjs','age')">Age</th>
+                <th onclick="sortTable('ftjs','gender')">Gender</th>
+                <th onclick="sortTable('ftjs','civil_status')">Civil Status</th>
+                <th onclick="sortTable('ftjs','address')">Address</th>
+                <th onclick="sortTable('ftjs','issued_at')">Date Issued</th>
+              </tr>
+            </thead>
+            <tbody id="ftjs-tbody">
+              <tr class="loading-row"><td colspan="8"><span class="spinner"></span>Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination" id="ftjs-pagination"></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /app -->
+
+<div id="toast"></div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const ADMIN_PASSWORD = 'bulajo2026'; // PALITAN ITO!
+const ROWS_PER_PAGE  = 50;
+
+let SUPABASE_URL = '';
+let SUPABASE_KEY = '';
+
+// Data stores
+let allResidents    = [];
+let allTransactions = [];
+let allFtjs         = [];
+
+// Filter state
+let filteredResidents    = [];
+let filteredTransactions = [];
+let filteredFtjs         = [];
+
+// Pagination state
+let resPage = 1, txPage = 1, ftjsPage = 1;
+
+// Sort state
+let sortState = {};
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+window.onload = () => {
+  // Load saved config
+  SUPABASE_URL = localStorage.getItem('supa_url') || '';
+  SUPABASE_KEY = localStorage.getItem('supa_key') || '';
+
+  // Set today's date in filters
+  const today = new Date().toISOString().split('T')[0];
+  const monthAgo = new Date(Date.now() - 30*24*60*60*1000).toISOString().split('T')[0];
+  document.getElementById('tx-from').value = monthAgo;
+  document.getElementById('tx-to').value   = today;
+
+  // Update dash date
+  document.getElementById('dash-date').textContent =
+    new Date().toLocaleDateString('fil-PH', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+};
+
+// ── LOGIN ─────────────────────────────────────────────────────────────────────
+function doLogin() {
+  const pass = document.getElementById('login-pass').value;
+  const err  = document.getElementById('login-err');
+
+  if (pass === ADMIN_PASSWORD) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').classList.add('show');
+    err.style.display = 'none';
+
+    if (!SUPABASE_URL || !SUPABASE_KEY) {
+      setTimeout(() => openConfig(), 400);
+    } else {
+      connectAndLoad();
+    }
+  } else {
+    err.style.display = 'block';
+    document.getElementById('login-pass').value = '';
+    document.getElementById('login-pass').focus();
+  }
+}
+
+function doLogout() {
+  if (confirm('Sign out?')) {
+    document.getElementById('app').classList.remove('show');
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('login-pass').value = '';
+  }
+}
+
+// ── SUPABASE CONFIG ───────────────────────────────────────────────────────────
+function openConfig() {
+  document.getElementById('cfg-url').value = SUPABASE_URL;
+  document.getElementById('cfg-key').value = SUPABASE_KEY;
+  document.getElementById('config-modal').classList.add('show');
+}
+
+function closeConfig() {
+  document.getElementById('config-modal').classList.remove('show');
+}
+
+function saveConfig() {
+  const url = document.getElementById('cfg-url').value.trim();
+  const key = document.getElementById('cfg-key').value.trim();
+
+  if (!url || !key) { showToast('I-fill ang URL at Key!', 'error'); return; }
+
+  SUPABASE_URL = url;
+  SUPABASE_KEY = key;
+  localStorage.setItem('supa_url', url);
+  localStorage.setItem('supa_key', key);
+  closeConfig();
+  connectAndLoad();
+}
+
+// ── SUPABASE API ──────────────────────────────────────────────────────────────
+async function supaFetch(table, select = '*', params = '') {
+  if (!SUPABASE_URL || !SUPABASE_KEY) throw new Error('Supabase not configured');
+  const url = `${SUPABASE_URL.replace(/\/$/, '')}/rest/v1/${table}?select=${select}${params}&limit=10000`;
+  const res  = await fetch(url, {
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Accept': 'application/json'
+    }
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Supabase error ${res.status}: ${err.slice(0,200)}`);
+  }
+  return res.json();
+}
+
+// ── CONNECT & LOAD ALL ────────────────────────────────────────────────────────
+async function connectAndLoad() {
+  updateSyncStatus('⏳ Connecting...');
+  try {
+    await Promise.all([loadResidents(), loadTransactions(), loadFtjs()]);
+    loadDashboard();
+    updateSyncStatus('✅ Connected — ' + new Date().toLocaleTimeString('fil-PH'));
+  } catch(e) {
+    updateSyncStatus('❌ Not connected');
+    showToast('Hindi ma-connect sa Supabase. I-check ang config.', 'error');
+  }
+}
+
+function updateSyncStatus(msg) {
+  document.getElementById('sync-status').textContent = msg;
+}
+
+// ── LOAD DATA ─────────────────────────────────────────────────────────────────
+async function loadResidents() {
+  try {
+    allResidents = await supaFetch('residents');
+    filteredResidents = [...allResidents];
+    resPage = 1;
+    renderResidents();
+    document.getElementById('res-count').textContent = `${allResidents.length} records`;
+  } catch(e) {
+    renderError('res-tbody', 8, e.message);
+  }
+}
+
+async function loadTransactions() {
+  try {
+    allTransactions = await supaFetch('transaction_logs');
+    // Populate cert type filter
+    const types = [...new Set(allTransactions.map(r => r.cert_type).filter(Boolean))].sort();
+    const sel = document.getElementById('tx-type');
+    sel.innerHTML = '<option value="">All Types</option>' +
+      types.map(t => `<option value="${t}">${t}</option>`).join('');
+    filteredTransactions = [...allTransactions];
+    txPage = 1;
+    renderTransactions();
+    document.getElementById('tx-count').textContent = `${allTransactions.length} records`;
+  } catch(e) {
+    renderError('tx-tbody', 8, e.message);
+  }
+}
+
+async function loadFtjs() {
+  try {
+    // Join ftjs_issued with residents
+    const [ftjsRows, residents] = await Promise.all([
+      supaFetch('ftjs_issued'),
+      supaFetch('residents')
+    ]);
+    const resMap = {};
+    residents.forEach(r => { resMap[r.id] = r; });
+    allFtjs = ftjsRows.map(f => {
+      const r = resMap[f.resident_id] || {};
+      return {
+        resident_id: f.resident_id,
+        household_number: r.household_number || '',
+        full_name: r.full_name || '',
+        age: r.age || '',
+        gender: r.gender || '',
+        civil_status: r.civil_status || '',
+        address: r.address || '',
+        issued_at: f.issued_at || ''
+      };
+    });
+    filteredFtjs = [...allFtjs];
+    ftjsPage = 1;
+    renderFtjs();
+    document.getElementById('ftjs-count').textContent = `${allFtjs.length} records`;
+  } catch(e) {
+    renderError('ftjs-tbody', 8, e.message);
+  }
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────────────
+function loadDashboard() {
+  // Stats
+  document.getElementById('stat-residents').textContent = allResidents.length.toLocaleString();
+  const hh = new Set(allResidents.map(r => r.household_number)).size;
+  document.getElementById('stat-residents-sub').textContent = `${hh} households`;
+
+  document.getElementById('stat-tx').textContent = allTransactions.length.toLocaleString();
+  const thisMonth = allTransactions.filter(t => {
+    const d = new Date(t.transaction_date || t.date_issued || '');
+    const now = new Date();
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  }).length;
+  document.getElementById('stat-tx-sub').textContent = `${thisMonth} ngayong buwan`;
+
+  const total = allTransactions.reduce((s, t) => s + (parseFloat(t.amount) || 0), 0);
+  document.getElementById('stat-amount').textContent = 'PHP ' + total.toLocaleString('en-PH', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+  document.getElementById('stat-ftjs').textContent = allFtjs.length.toLocaleString();
+
+  // Cert type chart
+  const certCounts = {};
+  allTransactions.forEach(t => {
+    const k = t.cert_type || 'Unknown';
+    certCounts[k] = (certCounts[k] || 0) + 1;
+  });
+  const certMax = Math.max(...Object.values(certCounts), 1);
+  const certSorted = Object.entries(certCounts).sort((a,b) => b[1]-a[1]);
+
+  document.getElementById('cert-chart').innerHTML = certSorted.length ? certSorted.map(([label, count]) => `
+    <div class="bar-item">
+      <div class="bar-label" style="font-size:12px">${label}</div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${Math.round(count/certMax*100)}%"></div>
+      </div>
+      <div class="bar-count">${count}</div>
+    </div>
+  `).join('') : '<div class="no-data"><div class="no-data-icon">📊</div><div class="no-data-text">Walang data</div></div>';
+
+  // Gender chart
+  const genderCounts = {};
+  allResidents.forEach(r => {
+    const g = r.gender || 'Unknown';
+    genderCounts[g] = (genderCounts[g] || 0) + 1;
+  });
+  const genMax = Math.max(...Object.values(genderCounts), 1);
+  const genColors = { Male: '#1565c0', Female: '#c2185b' };
+
+  document.getElementById('gender-chart').innerHTML = Object.entries(genderCounts).map(([label, count]) => `
+    <div class="bar-item">
+      <div class="bar-label">${label}</div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${Math.round(count/genMax*100)}%;background:${genColors[label]||'var(--navy)'}"></div>
+      </div>
+      <div class="bar-count">${count}</div>
+    </div>
+  `).join('');
+}
+
+// ── FILTER ────────────────────────────────────────────────────────────────────
+function filterResidents() {
+  const q  = document.getElementById('res-search').value.toLowerCase();
+  const g  = document.getElementById('res-gender').value;
+  filteredResidents = allResidents.filter(r =>
+    (!q || (r.full_name||'').toLowerCase().includes(q) ||
+           (r.household_number||'').toLowerCase().includes(q) ||
+           (r.address||'').toLowerCase().includes(q)) &&
+    (!g || r.gender === g)
+  );
+  resPage = 1;
+  renderResidents();
+  document.getElementById('res-count').textContent = `${filteredResidents.length} of ${allResidents.length}`;
+}
+
+function filterTransactions() {
+  const q    = document.getElementById('tx-search').value.toLowerCase();
+  const type = document.getElementById('tx-type').value;
+  const from = document.getElementById('tx-from').value;
+  const to   = document.getElementById('tx-to').value;
+
+  filteredTransactions = allTransactions.filter(t => {
+    const dateStr = (t.date_issued || t.transaction_date || '').slice(0,10);
+    return (!q || (t.resident_name||'').toLowerCase().includes(q) ||
+                  (t.cert_type||'').toLowerCase().includes(q) ||
+                  (t.or_number||'').toLowerCase().includes(q)) &&
+           (!type || t.cert_type === type) &&
+           (!from || dateStr >= from) &&
+           (!to   || dateStr <= to);
+  });
+  txPage = 1;
+  renderTransactions();
+  document.getElementById('tx-count').textContent = `${filteredTransactions.length} of ${allTransactions.length}`;
+}
+
+function filterFtjs() {
+  const q = document.getElementById('ftjs-search').value.toLowerCase();
+  const g = document.getElementById('ftjs-gender').value;
+  filteredFtjs = allFtjs.filter(r =>
+    (!q || (r.full_name||'').toLowerCase().includes(q) ||
+           (r.household_number||'').toLowerCase().includes(q)) &&
+    (!g || r.gender === g)
+  );
+  ftjsPage = 1;
+  renderFtjs();
+  document.getElementById('ftjs-count').textContent = `${filteredFtjs.length} of ${allFtjs.length}`;
+}
+
+// ── SORT ──────────────────────────────────────────────────────────────────────
+function sortTable(tbl, col) {
+  const key = tbl + '_' + col;
+  sortState[key] = sortState[key] === 'asc' ? 'desc' : 'asc';
+  const asc = sortState[key] === 'asc';
+
+  const sort = (arr) => arr.sort((a,b) => {
+    const av = a[col] ?? ''; const bv = b[col] ?? '';
+    if (typeof av === 'number' || !isNaN(av)) return asc ? av - bv : bv - av;
+    return asc ? String(av).localeCompare(String(bv)) : String(bv).localeCompare(String(av));
+  });
+
+  if (tbl === 'residents')    { filteredResidents    = sort([...filteredResidents]);    renderResidents(); }
+  if (tbl === 'transactions') { filteredTransactions = sort([...filteredTransactions]); renderTransactions(); }
+  if (tbl === 'ftjs')         { filteredFtjs         = sort([...filteredFtjs]);         renderFtjs(); }
+}
+
+// ── RENDER TABLES ─────────────────────────────────────────────────────────────
+function paginate(arr, page) {
+  const start = (page-1) * ROWS_PER_PAGE;
+  return arr.slice(start, start + ROWS_PER_PAGE);
+}
+
+function renderPagination(containerId, total, currentPage, setPage) {
+  const pages = Math.ceil(total / ROWS_PER_PAGE);
+  const el = document.getElementById(containerId);
+  if (pages <= 1) { el.innerHTML = ''; return; }
+
+  const start = (currentPage-1)*ROWS_PER_PAGE+1;
+  const end   = Math.min(currentPage*ROWS_PER_PAGE, total);
+
+  let btns = '';
+  const range = 2;
+  for (let p = 1; p <= pages; p++) {
+    if (p === 1 || p === pages || Math.abs(p - currentPage) <= range) {
+      btns += `<button class="page-btn ${p===currentPage?'active':''}" onclick="${setPage}(${p})">${p}</button>`;
+    } else if (Math.abs(p - currentPage) === range+1) {
+      btns += `<span style="padding:6px 4px;color:var(--grey)">…</span>`;
+    }
+  }
+
+  el.innerHTML = `
+    <span class="page-info">${start}–${end} of ${total}</span>
+    <div class="page-btns">
+      <button class="page-btn" onclick="${setPage}(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>
+      ${btns}
+      <button class="page-btn" onclick="${setPage}(${currentPage+1})" ${currentPage===pages?'disabled':''}>›</button>
+    </div>`;
+}
+
+function setResPage(p) { resPage = p; renderResidents(); }
+function setTxPage(p)  { txPage  = p; renderTransactions(); }
+function setFtjsPage(p){ ftjsPage = p; renderFtjs(); }
+
+function renderResidents() {
+  const rows = paginate(filteredResidents, resPage);
+  const tbody = document.getElementById('res-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="no-data"><div class="no-data-icon">🔍</div><div class="no-data-text">Walang nahanap</div></div></td></tr>`;
+    document.getElementById('res-pagination').innerHTML = '';
+    return;
+  }
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--grey)">${r.id}</span></td>
+      <td><strong>${esc(r.household_number)}</strong></td>
+      <td>${esc(r.full_name)}</td>
+      <td>${r.age ?? ''}</td>
+      <td><span class="badge ${r.gender==='Male'?'badge-male':'badge-female'}">${esc(r.gender)}</span></td>
+      <td>${esc(r.civil_status)}</td>
+      <td style="font-size:12px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.address)}</td>
+      <td style="font-size:12px;color:var(--grey);font-family:'DM Mono',monospace">${fmtDate(r.created_at)}</td>
+    </tr>`).join('');
+  renderPagination('res-pagination', filteredResidents.length, resPage, 'setResPage');
+}
+
+function renderTransactions() {
+  const rows = paginate(filteredTransactions, txPage);
+  const tbody = document.getElementById('tx-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="no-data"><div class="no-data-icon">🔍</div><div class="no-data-text">Walang nahanap</div></div></td></tr>`;
+    document.getElementById('tx-pagination').innerHTML = '';
+    return;
+  }
+  tbody.innerHTML = rows.map(t => `
+    <tr>
+      <td><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--grey)">${t.id}</span></td>
+      <td><strong>${esc(t.resident_name)}</strong></td>
+      <td><span class="badge badge-ftjs">${esc(t.cert_type)}</span></td>
+      <td><span style="font-family:'DM Mono',monospace;font-size:12px">${esc(t.or_number||'—')}</span></td>
+      <td class="amount-cell">
+        ${t.is_free ? '<span class="badge badge-free">FREE</span>' :
+          `<span class="badge badge-paid">PHP ${parseFloat(t.amount||0).toLocaleString('en-PH',{minimumFractionDigits:2})}</span>`}
+      </td>
+      <td style="font-size:12px">${esc(t.issued_by)}</td>
+      <td style="font-size:12px;font-family:'DM Mono',monospace;color:var(--grey)">${fmtDate(t.date_issued||t.transaction_date)}</td>
+      <td style="font-size:12px;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t.purpose||'')}</td>
+    </tr>`).join('');
+  renderPagination('tx-pagination', filteredTransactions.length, txPage, 'setTxPage');
+}
+
+function renderFtjs() {
+  const rows = paginate(filteredFtjs, ftjsPage);
+  const tbody = document.getElementById('ftjs-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="no-data"><div class="no-data-icon">🔍</div><div class="no-data-text">Walang nahanap</div></div></td></tr>`;
+    document.getElementById('ftjs-pagination').innerHTML = '';
+    return;
+  }
+  const offset = (ftjsPage-1)*ROWS_PER_PAGE;
+  tbody.innerHTML = rows.map((r,i) => `
+    <tr>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--grey)">${offset+i+1}</td>
+      <td><strong>${esc(r.household_number)}</strong></td>
+      <td>${esc(r.full_name)}</td>
+      <td>${r.age ?? ''}</td>
+      <td><span class="badge ${r.gender==='Male'?'badge-male':'badge-female'}">${esc(r.gender)}</span></td>
+      <td>${esc(r.civil_status)}</td>
+      <td style="font-size:12px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.address)}</td>
+      <td style="font-size:12px;font-family:'DM Mono',monospace;color:var(--grey)">${fmtDate(r.issued_at)}</td>
+    </tr>`).join('');
+  renderPagination('ftjs-pagination', filteredFtjs.length, ftjsPage, 'setFtjsPage');
+}
+
+function renderError(tbodyId, cols, msg) {
+  document.getElementById(tbodyId).innerHTML =
+    `<tr><td colspan="${cols}"><div class="no-data"><div class="no-data-icon">⚠️</div>
+    <div class="no-data-text">Hindi ma-load ang data</div>
+    <div class="no-data-sub" style="font-size:12px;font-family:'DM Mono',monospace">${esc(msg)}</div></div></td></tr>`;
+}
+
+// ── EXPORT EXCEL ──────────────────────────────────────────────────────────────
+function exportResidents() {
+  if (!filteredResidents.length) { showToast('Walang data na ie-export!', 'error'); return; }
+
+  const ws_data = [
+    ['BARANGAY BULAJO — MASTERLIST OF RESIDENTS'],
+    [`As of: ${new Date().toLocaleDateString('fil-PH', {year:'numeric',month:'long',day:'numeric'})}`],
+    [],
+    ['ID','Household No.','Full Name','Age','Gender','Civil Status','Address','Date Registered']
+  ];
+  filteredResidents.forEach(r => ws_data.push([
+    r.id, r.household_number, r.full_name, r.age,
+    r.gender, r.civil_status, r.address, fmtDate(r.created_at)
+  ]));
+  ws_data.push([]);
+  ws_data.push(['TOTAL:', filteredResidents.length]);
+
+  exportExcel(ws_data, 'RESIDENTS_MASTERLIST', 'Masterlist');
+  showToast('✅ Residents Masterlist exported!', 'success');
+}
+
+function exportTransactions() {
+  if (!filteredTransactions.length) { showToast('Walang data na ie-export!', 'error'); return; }
+
+  const ws_data = [
+    ['BARANGAY BULAJO — TRANSACTION LOG REPORT'],
+    [`As of: ${new Date().toLocaleDateString('fil-PH', {year:'numeric',month:'long',day:'numeric'})}`],
+    [],
+    ['ID','Resident Name','Certificate Type','OR Number','Cedula No.','Amount','Free?','Issued By','Date Issued','Purpose']
+  ];
+  filteredTransactions.forEach(t => ws_data.push([
+    t.id, t.resident_name, t.cert_type, t.or_number||'',
+    t.cedula_number||'', parseFloat(t.amount||0), t.is_free?'YES':'NO',
+    t.issued_by, fmtDate(t.date_issued||t.transaction_date), t.purpose||''
+  ]));
+
+  // Summary sheet
+  const certCounts = {};
+  filteredTransactions.forEach(t => {
+    certCounts[t.cert_type||'Unknown'] = (certCounts[t.cert_type||'Unknown'] || 0) + 1;
+  });
+  const ws2 = [
+    ['SUMMARY BY CERTIFICATE TYPE'],
+    [],
+    ['Certificate Type','Count']
+  ];
+  Object.entries(certCounts).sort((a,b)=>b[1]-a[1]).forEach(([k,v]) => ws2.push([k, v]));
+  const totalAmt = filteredTransactions.reduce((s,t)=>s+(parseFloat(t.amount)||0),0);
+  ws2.push([]);
+  ws2.push(['TOTAL TRANSACTIONS:', filteredTransactions.length]);
+  ws2.push(['TOTAL COLLECTED:', `PHP ${totalAmt.toFixed(2)}`]);
+
+  const wb   = XLSX.utils.book_new();
+  const ws1r = XLSX.utils.aoa_to_sheet(ws_data);
+  const ws2r = XLSX.utils.aoa_to_sheet(ws2);
+  XLSX.utils.book_append_sheet(wb, ws1r, 'TRANSACTION LOG');
+  XLSX.utils.book_append_sheet(wb, ws2r, 'SUMMARY');
+  XLSX.writeFile(wb, `TRANSACTION_LOG_${dateStamp()}.xlsx`);
+  showToast('✅ Transaction Log exported!', 'success');
+}
+
+function exportFtjs() {
+  if (!filteredFtjs.length) { showToast('Walang data na ie-export!', 'error'); return; }
+
+  const ws_data = [
+    ['BARANGAY BULAJO — FTJS MASTERLIST'],
+    ['MASTERLIST NG MGA FIRST-TIME JOB SEEKER (FTJS) CERTIFICATE RECIPIENTS'],
+    [`As of: ${new Date().toLocaleDateString('fil-PH', {year:'numeric',month:'long',day:'numeric'})}  |  Total Issued: ${filteredFtjs.length}`],
+    [],
+    ['No.','Household No.','Full Name','Age','Gender','Civil Status','Address','Date Issued']
+  ];
+  filteredFtjs.forEach((r,i) => ws_data.push([
+    i+1, r.household_number, r.full_name, r.age,
+    r.gender, r.civil_status, r.address, fmtDate(r.issued_at)
+  ]));
+  ws_data.push([]);
+  ws_data.push(['TOTAL FTJS RECIPIENTS:', filteredFtjs.length]);
+
+  // Summary sheet
+  const gCounts = {};
+  filteredFtjs.forEach(r => { gCounts[r.gender||'Unknown'] = (gCounts[r.gender||'Unknown']||0)+1; });
+  const ws2 = [
+    ['BARANGAY BULAJO — FTJS SUMMARY'],
+    [],
+    ['Kategorya','Bilang','Porsyento']
+  ];
+  const total = filteredFtjs.length || 1;
+  Object.entries(gCounts).forEach(([k,v]) => ws2.push([k, v, (v/total*100).toFixed(1)+'%']));
+  ws2.push([]);
+  ws2.push(['KABUUAN (TOTAL):', filteredFtjs.length, '100.0%']);
+
+  const wb   = XLSX.utils.book_new();
+  const ws1r = XLSX.utils.aoa_to_sheet(ws_data);
+  const ws2r = XLSX.utils.aoa_to_sheet(ws2);
+  XLSX.utils.book_append_sheet(wb, ws1r, 'FTJS MASTERLIST');
+  XLSX.utils.book_append_sheet(wb, ws2r, 'SUMMARY');
+  XLSX.writeFile(wb, `FTJS_MASTERLIST_${dateStamp()}.xlsx`);
+  showToast('✅ FTJS Masterlist exported!', 'success');
+}
+
+function exportExcel(data, filename, sheetname) {
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  XLSX.utils.book_append_sheet(wb, ws, sheetname);
+  XLSX.writeFile(wb, `${filename}_${dateStamp()}.xlsx`);
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    const tabs = ['dashboard','residents','transactions','ftjs'];
+    t.classList.toggle('active', tabs[i] === tab);
+  });
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function esc(str) {
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function fmtDate(str) {
+  if (!str) return '—';
+  const d = new Date(str);
+  if (isNaN(d)) return str.slice(0,10);
+  return d.toLocaleDateString('fil-PH', {year:'numeric',month:'short',day:'numeric'});
+}
+
+function dateStamp() {
+  return new Date().toISOString().slice(0,10).replace(/-/g,'');
+}
+
+let toastTimer;
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show' + (type ? ' '+type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>
